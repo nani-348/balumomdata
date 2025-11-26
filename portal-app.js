@@ -477,9 +477,12 @@ function populateCompanySelectors() {
 // Load all files
 function loadAllFiles(companyId = '') {
     const container = document.getElementById('filesList');
-    let filteredFiles = companyId ? files.filter(f => f.companyId === companyId) : files;
+    // Support both company_id (from API) and companyId (legacy)
+    let filteredFiles = companyId 
+        ? files.filter(f => (f.company_id || f.companyId) === companyId) 
+        : files;
     
-    if (filteredFiles.length === 0) {
+    if (!filteredFiles || filteredFiles.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-folder-open"></i>
@@ -490,19 +493,28 @@ function loadAllFiles(companyId = '') {
     }
     
     container.innerHTML = filteredFiles.map(file => {
-        const company = companies.find(c => c.id === file.companyId);
+        // Support both company_id and companyId
+        const fileCompanyId = file.company_id || file.companyId;
+        const company = companies.find(c => c.id === fileCompanyId);
+        // Get company name from file's companies relation or from companies array
+        const companyName = file.companies?.name || (company ? company.name : 'Unknown');
+        
         return `
             <div class="file-card" onclick="previewFile('${file.id}')">
                 <div class="file-icon">
                     <i class="fas ${getFileIcon(file.type)}"></i>
                 </div>
                 <h4>${escapeHtml(file.name)}</h4>
-                <p class="file-meta"><i class="fas fa-building"></i> ${company ? escapeHtml(company.name) : 'Unknown'}</p>
-                <p class="file-meta"><i class="fas fa-calendar"></i> ${formatDate(file.uploadedAt)}</p>
+                <p class="file-meta"><i class="fas fa-building"></i> ${escapeHtml(companyName)}</p>
+                <p class="file-meta"><i class="fas fa-tag"></i> ${escapeHtml(file.category || 'General')}</p>
+                <p class="file-meta"><i class="fas fa-calendar"></i> ${formatDate(file.uploaded_at || file.uploadedAt)}</p>
                 <p class="file-meta"><i class="fas fa-hdd"></i> ${formatFileSize(file.size)}</p>
                 <div class="file-actions">
-                    <button onclick="event.stopPropagation(); previewFile('${file.id}')" class="btn-preview">
-                        <i class="fas fa-eye"></i> Preview
+                    <button onclick="event.stopPropagation(); viewAdminFile('${file.id}')" class="btn-preview">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                    <button onclick="event.stopPropagation(); downloadAdminFile('${file.id}')" class="btn-download">
+                        <i class="fas fa-download"></i>
                     </button>
                     <button onclick="event.stopPropagation(); deleteFile('${file.id}')" class="btn-delete">
                         <i class="fas fa-trash"></i>
@@ -973,9 +985,54 @@ function downloadFile(id) {
         showToast(`Downloading ${file.name}...`, 'success');
     } else if (file.storage_path) {
         // Get file from Supabase storage
-        const url = `${window.SUPABASE_URL || 'https://kgdiqvpzghcyebunjzau.supabase.co'}/storage/v1/object/public/company-files/${file.storage_path}`;
+        const url = `https://kgdiqvpzghcyebunjzau.supabase.co/storage/v1/object/public/company-files/${file.storage_path}`;
         window.open(url, '_blank');
         showToast(`Opening ${file.name}...`, 'success');
+    } else {
+        showToast('File not available', 'error');
+    }
+}
+
+// View admin file (opens in new tab)
+function viewAdminFile(id) {
+    const file = files.find(f => f.id === id);
+    if (!file) return;
+    
+    if (file.storage_path) {
+        const url = `https://kgdiqvpzghcyebunjzau.supabase.co/storage/v1/object/public/company-files/${file.storage_path}`;
+        window.open(url, '_blank');
+        showToast(`Opening ${file.name}...`, 'success');
+    } else if (file.dataUrl) {
+        window.open(file.dataUrl, '_blank');
+        showToast(`Opening ${file.name}...`, 'success');
+    } else {
+        showToast('File not available', 'error');
+    }
+}
+
+// Download admin file
+function downloadAdminFile(id) {
+    const file = files.find(f => f.id === id);
+    if (!file) return;
+    
+    if (file.storage_path) {
+        const url = `https://kgdiqvpzghcyebunjzau.supabase.co/storage/v1/object/public/company-files/${file.storage_path}`;
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = file.name;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast(`Downloading ${file.name}...`, 'success');
+    } else if (file.dataUrl) {
+        const link = document.createElement('a');
+        link.href = file.dataUrl;
+        link.download = file.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast(`Downloading ${file.name}...`, 'success');
     } else {
         showToast('File not available', 'error');
     }
