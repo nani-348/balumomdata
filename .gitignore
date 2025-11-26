@@ -1,0 +1,38 @@
+# Environment variables (KEEP SECRETS SAFE!)
+.env
+backend/.env
+*.env.local
+*.env.production
+
+# Dependencies
+node_modules/
+backend/node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+**/.DS_Store
+Thumbs.db
+*.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test files
+test-connection.html
+
+# SQL fix files (temporary)
+*.sql
+
+# Build files
+dist/
+build/
+
+# Package lock (optional - some prefer to keep it)
+# package-lock.json

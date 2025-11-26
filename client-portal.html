@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Portal - Balu Associates</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portal-styles.css">
+</head>
+<body>
+    <div class="portal-app">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="screen active">
+            <div class="login-container">
+                <div class="login-header">
+                    <img src="https://i.postimg.cc/258rHHWh/Screenshot-2025-10-02-at-1-09-11-PM.png" alt="Logo" class="login-logo">
+                    <h1>Balu Associates</h1>
+                    <p>Client Portal</p>
+                </div>
+                
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    
+                    <p id="loginError" class="error-message"></p>
+                </form>
+                
+                <div class="login-footer">
+                    <p>Demo Credentials:</p>
+                    <small>Admin: admin@baluassociates.net / admin123</small><br>
+                    <small>Company: rainbow@company.com / company123</small>
+                </div>
+                
+                <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Website</a>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="adminDashboard" class="screen">
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <h1><i class="fas fa-user-shield"></i> Admin Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <span id="adminEmail" class="user-email"></span>
+                    <button onclick="logout()" class="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <div class="dashboard-content">
+                <!-- Stats Cards -->
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <i class="fas fa-building"></i>
+                        <div class="stat-info">
+                            <h3 id="statCompanies">0</h3>
+                            <p>Companies</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-file-alt"></i>
+                        <div class="stat-info">
+                            <h3 id="statFiles">0</h3>
+                            <p>Files</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-bell"></i>
+                        <div class="stat-info">
+                            <h3 id="statNotifications">0</h3>
+                            <p>Notifications Sent</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="showTab('companies')">
+                        <i class="fas fa-building"></i> Companies
+                    </button>
+                    <button class="tab-btn" onclick="showTab('files')">
+                        <i class="fas fa-folder"></i> Files
+                    </button>
+                    <button class="tab-btn" onclick="showTab('upload')">
+                        <i class="fas fa-upload"></i> Upload
+                    </button>
+                    <button class="tab-btn" onclick="showTab('notifications')">
+                        <i class="fas fa-bell"></i> Notifications
+                    </button>
+                    <button class="tab-btn" onclick="showTab('activity')">
+                        <i class="fas fa-history"></i> Activity Log
+                    </button>
+                    <button class="tab-btn" onclick="showTab('requests')">
+                        <i class="fas fa-file-import"></i> Requests
+                    </button>
+                </div>
+
+                <!-- Companies Tab -->
+                <div id="companiesTab" class="tab-content active">
+                    <div class="section-header">
+                        <h2>Manage Companies</h2>
+                        <div class="header-actions">
+                            <input type="text" id="searchCompanies" placeholder="Search companies..." class="search-input">
+                            <button onclick="exportCompanies()" class="btn-secondary">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                            <button onclick="showAddCompanyModal()" class="btn-primary">
+                                <i class="fas fa-plus"></i> Add Company
+                            </button>
+                        </div>
+                    </div>
+                    <div id="companiesList" class="companies-grid"></div>
+                </div>
+
+                <!-- Files Tab -->
+                <div id="filesTab" class="tab-content">
+                    <div class="section-header">
+                        <h2>All Files</h2>
+                        <div class="header-actions">
+                            <input type="text" id="searchFiles" placeholder="Search files..." class="search-input">
+                            <select id="filterCategory" onchange="filterFiles()">
+                                <option value="">All Categories</option>
+                            </select>
+                            <select id="filterCompany" onchange="filterFiles()">
+                                <option value="">All Companies</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="filesList" class="files-grid"></div>
+                </div>
+
+                <!-- Upload Tab -->
+                <div id="uploadTab" class="tab-content">
+                    <div class="section-header">
+                        <h2>Upload Files</h2>
+                    </div>
+                    <div class="upload-section">
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>Select Company *</label>
+                                <select id="uploadCompany" required>
+                                    <option value="">Choose a company</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Category *</label>
+                                <select id="uploadCategory" required>
+                                    <option value="">Choose category</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Expiry Date (Optional)</label>
+                            <input type="date" id="uploadExpiry" min="">
+                        </div>
+                        
+                        <div class="upload-zone" id="uploadZone">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drag & drop files here or click to browse</p>
+                            <small>Supports: PDF, JPG, PNG, DOC, DOCX, XLS, XLSX (Max 10MB each)</small>
+                            <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" hidden>
+                        </div>
+                        
+                        <div id="selectedFiles" class="selected-files"></div>
+                        <div id="uploadProgress" class="upload-progress"></div>
+                        
+                        <button onclick="uploadFiles()" class="btn-primary btn-full">
+                            <i class="fas fa-upload"></i> Upload Files
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Activity Log Tab -->
+                <div id="activityTab" class="tab-content">
+                    <div class="section-header">
+                        <h2>Activity Log</h2>
+                        <button onclick="clearActivityLog()" class="btn-secondary">
+                            <i class="fas fa-trash"></i> Clear Log
+                        </button>
+                    </div>
+                    <div id="activityList" class="activity-list"></div>
+                </div>
+
+                <!-- Document Requests Tab -->
+                <div id="requestsTab" class="tab-content">
+                    <div class="section-header">
+                        <h2>Document Requests</h2>
+                    </div>
+                    <div id="requestsList" class="requests-list"></div>
+                </div>
+
+                <!-- Notifications Tab -->
+                <div id="notificationsTab" class="tab-content">
+                    <div class="section-header">
+                        <h2>Send Notification</h2>
+                    </div>
+                    <div class="notification-section">
+                        <div class="form-group">
+                            <label>Select Company</label>
+                            <select id="notifyCompany">
+                                <option value="">All Companies</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Subject</label>
+                            <input type="text" id="notifySubject" placeholder="Notification subject">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Message</label>
+                            <textarea id="notifyMessage" rows="5" placeholder="Enter your message"></textarea>
+                        </div>
+                        
+                        <button onclick="sendNotification()" class="btn-primary">
+                            <i class="fas fa-paper-plane"></i> Send Notification
+                        </button>
+                    </div>
+                    
+                    <div class="section-header" style="margin-top: 30px;">
+                        <h2>Sent Notifications</h2>
+                    </div>
+                    <div id="notificationsList" class="notifications-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Company Dashboard -->
+        <div id="companyDashboard" class="screen">
+            <header class="dashboard-header company-header">
+                <div class="header-left">
+                    <h1><i class="fas fa-briefcase"></i> <span id="companyName">Company Portal</span></h1>
+                </div>
+                <div class="header-right">
+                    <span id="companyEmail" class="user-email"></span>
+                    <button onclick="logout()" class="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <div class="dashboard-content">
+                <!-- Company Stats -->
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <i class="fas fa-file-alt"></i>
+                        <div class="stat-info">
+                            <h3 id="companyStatFiles">0</h3>
+                            <p>Your Files</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-download"></i>
+                        <div class="stat-info">
+                            <h3 id="companyStatDownloads">0</h3>
+                            <p>Downloads</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-bell"></i>
+                        <div class="stat-info">
+                            <h3 id="companyStatNotifications">0</h3>
+                            <p>Notifications</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Company Tabs -->
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="showCompanyTab('myfiles')">
+                        <i class="fas fa-folder"></i> My Files
+                    </button>
+                    <button class="tab-btn" onclick="showCompanyTab('mynotifications')">
+                        <i class="fas fa-bell"></i> Notifications
+                    </button>
+                    <button class="tab-btn" onclick="showCompanyTab('requestdoc')">
+                        <i class="fas fa-file-import"></i> Request Document
+                    </button>
+                    <button class="tab-btn" onclick="showCompanyTab('profile')">
+                        <i class="fas fa-user-cog"></i> Profile
+                    </button>
+                </div>
+
+                <!-- My Files Tab -->
+                <div id="myfilesTab" class="tab-content active">
+                    <div class="section-header">
+                        <h2>Your Documents</h2>
+                        <div class="header-actions">
+                            <input type="text" id="searchCompanyFiles" placeholder="Search files..." class="search-input">
+                            <select id="filterCompanyCategory" onchange="loadCompanyFiles()">
+                                <option value="">All Categories</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="companyFilesList" class="files-grid"></div>
+                </div>
+
+                <!-- My Notifications Tab -->
+                <div id="mynotificationsTab" class="tab-content">
+                    <div class="section-header">
+                        <h2>Your Notifications</h2>
+                    </div>
+                    <div id="companyNotificationsList" class="notifications-list"></div>
+                </div>
+
+                <!-- Request Document Tab -->
+                <div id="requestdocTab" class="tab-content">
+                    <div class="section-header">
+                        <h2>Request Document</h2>
+                    </div>
+                    <div class="request-section">
+                        <form id="requestDocForm">
+                            <div class="form-group">
+                                <label>Document Type *</label>
+                                <select id="requestDocType" required>
+                                    <option value="">Select type</option>
+                                    <option value="Tax Return">Tax Return</option>
+                                    <option value="GST Certificate">GST Certificate</option>
+                                    <option value="Financial Statement">Financial Statement</option>
+                                    <option value="Audit Report">Audit Report</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Description *</label>
+                                <textarea id="requestDescription" rows="4" placeholder="Describe what you need..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary btn-full">
+                                <i class="fas fa-paper-plane"></i> Send Request
+                            </button>
+                        </form>
+                        
+                        <div class="section-header" style="margin-top: 30px;">
+                            <h3>Your Requests</h3>
+                        </div>
+                        <div id="myRequestsList" class="requests-list"></div>
+                    </div>
+                </div>
+
+                <!-- Profile Tab -->
+                <div id="profileTab" class="tab-content">
+                    <div class="section-header">
+                        <h2>Profile Settings</h2>
+                    </div>
+                    <div class="profile-section">
+                        <form id="changePasswordForm">
+                            <h3>Change Password</h3>
+                            <div class="form-group">
+                                <label>Current Password *</label>
+                                <input type="password" id="currentPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <label>New Password *</label>
+                                <input type="password" id="newPassword" required>
+                                <div id="passwordStrength" class="password-strength"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>Confirm New Password *</label>
+                                <input type="password" id="confirmPassword" required>
+                            </div>
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-key"></i> Change Password
+                            </button>
+                        </form>
+                        
+                        <div class="login-history">
+                            <h3>Login History</h3>
+                            <div id="loginHistoryList"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Company Modal -->
+    <div id="addCompanyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-building"></i> Add New Company</h2>
+                <button onclick="closeModal('addCompanyModal')" class="modal-close">&times;</button>
+            </div>
+            <form id="addCompanyForm">
+                <div class="form-group">
+                    <label>Company Name *</label>
+                    <input type="text" id="newCompanyName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="newCompanyEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password *</label>
+                    <input type="password" id="newCompanyPassword" placeholder="Set login password for company" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="newCompanyPhone">
+                </div>
+                <button type="submit" class="btn-primary btn-full">
+                    <i class="fas fa-plus"></i> Add Company
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Company Modal -->
+    <div id="editCompanyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Edit Company</h2>
+                <button onclick="closeModal('editCompanyModal')" class="modal-close">&times;</button>
+            </div>
+            <form id="editCompanyForm">
+                <input type="hidden" id="editCompanyId">
+                <div class="form-group">
+                    <label>Company Name *</label>
+                    <input type="text" id="editCompanyName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="editCompanyEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>New Password (leave blank to keep current)</label>
+                    <input type="password" id="editCompanyPassword" placeholder="Enter new password or leave blank">
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="editCompanyPhone">
+                </div>
+                <button type="submit" class="btn-primary btn-full">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Company Files Modal -->
+    <div id="companyFilesModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <div>
+                    <h2><i class="fas fa-folder-open"></i> <span id="companyFilesTitle">Company Files</span></h2>
+                    <small id="companyFilesCount">0 files</small>
+                </div>
+                <button onclick="closeModal('companyFilesModal')" class="modal-close">&times;</button>
+            </div>
+            <div id="companyFilesGrid" class="files-grid"></div>
+        </div>
+    </div>
+
+    <!-- File Preview Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2><i class="fas fa-eye"></i> <span id="previewFileName">File Preview</span></h2>
+                <button onclick="closeModal('previewModal')" class="modal-close">&times;</button>
+            </div>
+            <div id="previewContent" class="preview-content"></div>
+            <div class="modal-footer">
+                <button onclick="downloadCurrentFile()" class="btn-primary">
+                    <i class="fas fa-download"></i> Download
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="portal-api.js?v=4"></script>
+    <script src="portal-app.js?v=4"></script>
+</body>
+</html>
