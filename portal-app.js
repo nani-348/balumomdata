@@ -990,7 +990,7 @@ function downloadFile(id) {
         showToast(`Downloading ${file.name}...`, 'success');
     } else if (file.storage_path) {
         // Get file from Supabase storage
-        const url = `https://kgdiqvpzghcyebunjzau.supabase.co/storage/v1/object/public/company-files/${file.storage_path}`;
+        const url = `${CONFIG.SUPABASE_URL}/storage/v1/object/public/company-files/${file.storage_path}`;
         window.open(url, '_blank');
         showToast(`Opening ${file.name}...`, 'success');
     } else {
@@ -1004,7 +1004,7 @@ function viewAdminFile(id) {
     if (!file) return;
     
     if (file.storage_path) {
-        const url = `https://kgdiqvpzghcyebunjzau.supabase.co/storage/v1/object/public/company-files/${file.storage_path}`;
+        const url = `${CONFIG.SUPABASE_URL}/storage/v1/object/public/company-files/${file.storage_path}`;
         window.open(url, '_blank');
         showToast(`Opening ${file.name}...`, 'success');
     } else if (file.dataUrl) {
@@ -1021,7 +1021,7 @@ function downloadAdminFile(id) {
     if (!file) return;
     
     if (file.storage_path) {
-        const url = `https://kgdiqvpzghcyebunjzau.supabase.co/storage/v1/object/public/company-files/${file.storage_path}`;
+        const url = `${CONFIG.SUPABASE_URL}/storage/v1/object/public/company-files/${file.storage_path}`;
         const link = document.createElement('a');
         link.href = url;
         link.download = file.name;
@@ -1057,7 +1057,7 @@ async function viewCompanyFile(id) {
     
     // Open file
     if (file.storage_path) {
-        const url = `https://kgdiqvpzghcyebunjzau.supabase.co/storage/v1/object/public/company-files/${file.storage_path}`;
+        const url = `${CONFIG.SUPABASE_URL}/storage/v1/object/public/company-files/${file.storage_path}`;
         window.open(url, '_blank');
         showToast(`Opening ${file.name}...`, 'success');
     } else {
@@ -1071,7 +1071,7 @@ function downloadCompanyFile(id) {
     if (!file) return;
     
     if (file.storage_path) {
-        const url = `https://kgdiqvpzghcyebunjzau.supabase.co/storage/v1/object/public/company-files/${file.storage_path}`;
+        const url = `${CONFIG.SUPABASE_URL}/storage/v1/object/public/company-files/${file.storage_path}`;
         const link = document.createElement('a');
         link.href = url;
         link.download = file.name;

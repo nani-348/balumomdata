@@ -1,38 +1,63 @@
-# Environment variables (KEEP SECRETS SAFE!)
+# ============================================
+# ENVIRONMENT & SECRETS (NEVER COMMIT!)
+# ============================================
 .env
+.env.local
+.env.production
+.env.development
 backend/.env
-*.env.local
-*.env.production
+backend/.env.local
+backend/.env.production
+*.env
 
-# Dependencies
+# ============================================
+# DEPENDENCIES
+# ============================================
 node_modules/
 backend/node_modules/
+package-lock.json
+yarn.lock
 
-# Logs
+# ============================================
+# LOGS & TEMP FILES
+# ============================================
 *.log
 npm-debug.log*
-
-# OS files
+yarn-debug.log*
+yarn-error.log*
 .DS_Store
 **/.DS_Store
 Thumbs.db
-*.DS_Store
 
-# IDE files
+# ============================================
+# IDE & EDITOR
+# ============================================
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-project
+*.sublime-workspace
 
-# Test files
-test-connection.html
-
-# SQL fix files (temporary)
-*.sql
-
-# Build files
+# ============================================
+# BUILD & DIST
+# ============================================
 dist/
 build/
+.next/
+out/
 
-# Package lock (optional - some prefer to keep it)
-# package-lock.json
+# ============================================
+# TESTING
+# ============================================
+coverage/
+.nyc_output/
+
+# ============================================
+# OS SPECIFIC
+# ============================================
+.DS_Store
+.AppleDouble
+.LSOverride
+*.pem
+*.key
