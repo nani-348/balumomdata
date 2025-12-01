@@ -2,54 +2,7 @@
 // API CLIENT FOR BACKEND INTEGRATION
 // ============================================
 
-// Detect API URL based on environment
-let API_BASE_URL;
-
-if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    // Development
-    API_BASE_URL = 'http://localhost:5000/api';
-} else {
-    // Production - try same domain first, then with :5000
-    const protocol = window.location.protocol;
-    const hostname = window.location.hostname;
-    
-    // Try same domain (if backend is on same domain)
-    API_BASE_URL = `${protocol}//${hostname}/api`;
-    
-    // Or use explicit port if needed
-    // API_BASE_URL = `${protocol}//${hostname}:5000/api`;
-}
-
-// Get Supabase URL from backend
-let SUPABASE_URL = window.SUPABASE_URL || null;
-
-async function initializeConfig() {
-    if (SUPABASE_URL) {
-        console.log('Config already loaded:', { SUPABASE_URL });
-        return;
-    }
-    
-    try {
-        const configUrl = `${API_BASE_URL.replace('/api', '')}/config`;
-        console.log('Loading config from:', configUrl);
-        const response = await fetch(configUrl);
-        
-        if (!response.ok) {
-            throw new Error(`Config endpoint returned ${response.status}`);
-        }
-        
-        const data = await response.json();
-        SUPABASE_URL = data.supabaseUrl;
-        window.SUPABASE_URL = SUPABASE_URL;
-        console.log('✅ Config loaded:', { SUPABASE_URL });
-    } catch (error) {
-        console.error('⚠️ Failed to load config:', error);
-        // Fallback - use environment variable or default
-        SUPABASE_URL = window.SUPABASE_URL || 'https://your-supabase-url.supabase.co';
-        window.SUPABASE_URL = SUPABASE_URL;
-        console.log('Using fallback config:', { SUPABASE_URL });
-    }
-}
+const API_BASE_URL = 'http://localhost:5000/api';
 
 // Get auth token from session
 function getAuthToken() {

@@ -2,6 +2,18 @@
 // BALU ASSOCIATES CLIENT PORTAL
 // ============================================
 
+// Configuration - Initialize with defaults
+// In production, set window.SUPABASE_URL before loading this script
+const CONFIG = {
+    SUPABASE_URL: window.SUPABASE_URL || 'https://kgdiqvpzghcyebunjzau.supabase.co',
+    STORAGE_BUCKET: 'company-files'
+};
+
+// Function to update config at runtime
+function setSupabaseUrl(url) {
+    CONFIG.SUPABASE_URL = url;
+}
+
 // Data Storage - Using Supabase API (no localStorage)
 const STORAGE_KEYS = {
     CURRENT_USER: 'portal_current_user'
