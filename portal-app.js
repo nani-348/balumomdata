@@ -343,46 +343,51 @@ async function handleAddCompany(e) {
     }
 }
 
-// View company files
+// View company files - Shows all files uploaded to this company
 function viewCompanyFiles(companyId) {
     const company = companies.find(c => c.id === companyId);
     if (!company) return;
     
-    const companyFiles = files.filter(f => f.companyId === companyId);
+    // Support both company_id and companyId
+    const companyFiles = files.filter(f => (f.company_id || f.companyId) === companyId);
     
-    document.getElementById('companyFilesTitle').textContent = `${company.name} - Files`;
+    document.getElementById('companyFilesTitle').textContent = `${company.name} - All Files`;
     document.getElementById('companyFilesCount').textContent = `${companyFiles.length} file(s)`;
     
     const container = document.getElementById('companyFilesGrid');
     
-    if (companyFiles.length === 0) {
+    if (!companyFiles || companyFiles.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-folder-open"></i>
-                <p>No files shared with this company yet.</p>
+                <p>No files uploaded to this company yet.</p>
                 <button onclick="closeModal('companyFilesModal'); showTab('upload')" class="btn-primary" style="margin-top: 15px;">
-                    <i class="fas fa-upload"></i> Upload Files
+                    <i class="fas fa-upload"></i> Upload Files Now
                 </button>
             </div>
         `;
     } else {
-        container.innerHTML = companyFiles.map(file => `
-            <div class="file-card" onclick="previewFile('${file.id}')">
+        // Sort files by date (newest first)
+        const sorted = [...companyFiles].sort((a, b) => new Date(b.uploaded_at || b.uploadedAt) - new Date(a.uploaded_at || a.uploadedAt));
+        
+        container.innerHTML = sorted.map(file => `
+            <div class="file-card">
                 <div class="file-icon">
                     <i class="fas ${getFileIcon(file.type)}"></i>
                 </div>
                 <h4>${escapeHtml(file.name)}</h4>
-                <p class="file-meta"><i class="fas fa-calendar"></i> ${formatDate(file.uploadedAt)}</p>
+                <p class="file-meta"><i class="fas fa-tag"></i> ${escapeHtml(file.category || 'General')}</p>
+                <p class="file-meta"><i class="fas fa-calendar"></i> ${formatDate(file.uploaded_at || file.uploadedAt)}</p>
                 <p class="file-meta"><i class="fas fa-hdd"></i> ${formatFileSize(file.size)}</p>
                 <div class="file-actions">
-                    <button onclick="event.stopPropagation(); previewFile('${file.id}')" class="btn-preview">
-                        <i class="fas fa-eye"></i> Preview
+                    <button onclick="viewAdminFile('${file.id}')" class="btn-preview">
+                        <i class="fas fa-eye"></i> View
                     </button>
-                    <button onclick="event.stopPropagation(); downloadFile('${file.id}')" class="btn-download">
-                        <i class="fas fa-download"></i>
+                    <button onclick="downloadAdminFile('${file.id}')" class="btn-download">
+                        <i class="fas fa-download"></i> Download
                     </button>
-                    <button onclick="event.stopPropagation(); deleteFile('${file.id}'); viewCompanyFiles('${companyId}')" class="btn-delete">
-                        <i class="fas fa-trash"></i>
+                    <button onclick="deleteFile('${file.id}'); viewCompanyFiles('${companyId}')" class="btn-delete">
+                        <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
             </div>
@@ -1390,27 +1395,37 @@ function clearActivityLog() {
 function loadDocumentRequests() {
     const container = document.getElementById('requestsList');
     
-    if (documentRequests.length === 0) {
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-file-import"></i><p>No requests yet</p></div>';
+    if (!documentRequests || documentRequests.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-file-import"></i><p>No document requests yet</p><p style="color: #666; font-size: 0.9rem;">Companies will send requests here</p></div>';
         return;
     }
     
-    container.innerHTML = documentRequests.map(req => {
-        const company = companies.find(c => c.id === req.companyId);
+    // Sort by date (newest first)
+    const sorted = [...documentRequests].sort((a, b) => new Date(b.requested_at || b.requestedAt) - new Date(a.requested_at || a.requestedAt));
+    
+    container.innerHTML = sorted.map(req => {
+        // Support both company_id and companyId
+        const companyId = req.company_id || req.companyId;
+        const company = companies.find(c => c.id === companyId);
+        const status = req.status || 'pending';
+        const requestDate = req.requested_at || req.requestedAt;
+        
         return `
-            <div class="request-item ${req.status}">
+            <div class="request-item ${status}">
                 <div class="request-header">
-                    <h4>${escapeHtml(req.docType)}</h4>
-                    <span class="request-status ${req.status}">${req.status}</span>
+                    <h4><i class="fas fa-file-import"></i> ${escapeHtml(req.doc_type || req.docType)}</h4>
+                    <span class="request-status ${status}">${status.toUpperCase()}</span>
                 </div>
                 <p><strong>Company:</strong> ${company ? escapeHtml(company.name) : 'Unknown'}</p>
                 <p><strong>Description:</strong> ${escapeHtml(req.description)}</p>
-                <p class="request-meta">Requested on ${formatDate(req.requestedAt)}</p>
-                ${req.status === 'pending' ? `
+                <p class="request-meta"><i class="fas fa-calendar"></i> Requested on ${formatDate(requestDate)}</p>
+                ${status === 'pending' ? `
                     <button onclick="markRequestCompleted('${req.id}')" class="btn-primary" style="margin-top: 10px;">
                         <i class="fas fa-check"></i> Mark as Completed
                     </button>
-                ` : ''}
+                ` : `
+                    <p class="request-meta"><i class="fas fa-check-circle"></i> Completed on ${formatDate(req.completed_at || req.completedAt)}</p>
+                `}
             </div>
         `;
     }).join('');
