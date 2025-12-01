@@ -13,8 +13,9 @@ app.use(helmet({
     crossOriginEmbedderPolicy: false
 }));
 
-// CORS - Allow multiple origins for development
+// CORS - Allow multiple origins for development and production
 const allowedOrigins = [
+    // Development
     'http://localhost:8000',
     'http://127.0.0.1:8000',
     'http://localhost:5500',
@@ -24,8 +25,10 @@ const allowedOrigins = [
     'http://localhost:5502',
     'http://127.0.0.1:5502',
     'http://localhost:3000',
-    'http://127.0.0.1:3000'
-];
+    'http://127.0.0.1:3000',
+    // Production - add your domains here
+    process.env.CORS_ORIGIN || ''
+].filter(Boolean);
 
 app.use(cors({
     origin: function(origin, callback) {
@@ -65,6 +68,14 @@ app.use('/api/activity', require('./routes/activity'));
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', message: 'Server is running' });
+});
+
+// Config endpoint - provides Supabase URL to frontend
+app.get('/config', (req, res) => {
+    res.json({
+        supabaseUrl: process.env.SUPABASE_URL || 'https://your-supabase-url.supabase.co',
+        environment: process.env.NODE_ENV || 'development'
+    });
 });
 
 // Error handling

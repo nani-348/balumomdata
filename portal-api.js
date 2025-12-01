@@ -2,7 +2,27 @@
 // API CLIENT FOR BACKEND INTEGRATION
 // ============================================
 
-const API_BASE_URL = 'http://localhost:5000/api';
+// Detect API URL based on environment
+const API_BASE_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000/api'
+    : `${window.location.protocol}//${window.location.hostname}:5000/api`;
+
+// Get Supabase URL from backend
+let SUPABASE_URL = null;
+
+async function initializeConfig() {
+    try {
+        const response = await fetch(`${API_BASE_URL.replace('/api', '')}/config`);
+        const data = await response.json();
+        SUPABASE_URL = data.supabaseUrl;
+        window.SUPABASE_URL = SUPABASE_URL;
+        console.log('Config loaded:', { SUPABASE_URL });
+    } catch (error) {
+        console.error('Failed to load config:', error);
+        // Fallback to environment variable or default
+        SUPABASE_URL = window.SUPABASE_URL || 'https://your-supabase-url.supabase.co';
+    }
+}
 
 // Get auth token from session
 function getAuthToken() {
